@@ -64,8 +64,8 @@ public:
 };
 
 // a class that want its pointers to be tracked
-// by the tracker_ptr may inherit from the trackable_concept
-// but does not have to
+// by the tracker_ptr may inherit from the trackable_ptr_concept class
+// but do not have to
 template<class T>
 class trackable_ptr_concept
 {
