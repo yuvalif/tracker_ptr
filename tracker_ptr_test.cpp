@@ -53,6 +53,7 @@ void TestBasic()
     assert(p);
     p->set(5);
     assert(p->get() == b->get());
+    assert((*p).get() == 5);
     delete b;
     // now b is already deleted
     assert(!p);
@@ -67,8 +68,9 @@ void TestStaticAlloc()
         p.reset(&b);
         // a is still valid here
         assert(p);
-        p->set(5);
+        (*p).set(5);
         assert(p->get() == b.get());
+        assert((*p).get() == b.get());
     }
     // now b is already deleted
     assert(!p);
@@ -132,3 +134,4 @@ int main()
     std::cout << "all tests passed" << std::endl;
     return 0;
 }
+

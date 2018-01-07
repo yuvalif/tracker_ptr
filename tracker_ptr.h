@@ -43,11 +43,17 @@ public:
         return m_ptr;
     }
 
- T* get() const
+    T& operator*() const
+    {
+        return *m_ptr;
+    }
+
+    T* get() const
     {
         return m_ptr;
     }
 
+    // check whether pointer is null
     explicit operator bool() const
     {
         return m_ptr != nullptr;
@@ -63,9 +69,10 @@ public:
     }
 };
 
-// a class that want its pointers to be tracked
-// by the tracker_ptr may inherit from the trackable_ptr_concept class
-// but do not have to
+// a class that want its pointers to be trackedby the tracker_ptr
+// may inherit from the trackable_ptr_concept class.
+// but do not have to: any class that implements register_tracker() and unregister_tracker()
+// and make sure to call reset() on the tracker before actual deletion would work
 template<class T>
 class trackable_ptr_concept
 {
@@ -84,6 +91,7 @@ public:
         // we implicitly unregister
         m_tracker = tracker;
     }
+    
     // unregister a tracker
     void unregister_tracker(const tracker_ptr<T>* tracker)
     {
@@ -104,3 +112,4 @@ public:
         }
     }
 };
+
