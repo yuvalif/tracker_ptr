@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 // this class is used to track a pointer that it managed elsewhere
 // the tracker just wraps the pointer
 // and make sure that it could be set to null if deleted by its real owner
@@ -12,7 +14,7 @@ private:
 
 public:
     // ctor
-    tracker_ptr(T* ptr) : m_ptr(ptr)
+    explicit tracker_ptr(T* ptr) : m_ptr(ptr)
     {
         if (m_ptr)
         {
@@ -20,6 +22,14 @@ public:
         }
     }
 
+    // std::unique_ptr ctor
+    explicit tracker_ptr(const std::unique_ptr<T>& ptr) : m_ptr(ptr.get())
+    {
+        if (m_ptr)
+        {
+            m_ptr->register_tracker(this);
+        }
+    }
     // non copyable
     tracker_ptr(const tracker_ptr<T>& other) = delete;
     tracker_ptr<T>& operator=(const tracker_ptr<T>& other) = delete;

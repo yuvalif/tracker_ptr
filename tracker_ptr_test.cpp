@@ -1,6 +1,7 @@
 #include "tracker_ptr.h"
 #include <assert.h>
 #include <iostream>
+#include <memory>
 
 class A
 {
@@ -9,12 +10,12 @@ private:
 public:
     A() : m_a(0) {}
 
-    void set(int a)
+    void Set(int a)
     {
         m_a = a;
     }
 
-    int get() const
+    int Get() const
     {
         return m_a;
     }
@@ -51,13 +52,28 @@ void TestBasic()
     B* b = new B;
     tracker_ptr<B> p(b);
     assert(p);
-    p->set(5);
-    assert(p->get() == b->get());
-    assert((*p).get() == 5);
+    p->Set(5);
+    assert(p->Get() == b->Get());
+    assert((*p).Get() == 5);
     delete b;
     // now b is already deleted
     assert(!p);
-    // calling p->set(5); at this point should crash
+    // calling p->Set(5); at this point should crash
+}
+
+void TestUnique()
+{
+    std::unique_ptr<B> b = std::unique_ptr<B>(new B);
+    tracker_ptr<B> p(b);
+
+    assert(p);
+    p->Set(5);
+    assert(p->Get() == b->Get());
+    assert((*p).Get() == 5);
+    delete b.release();
+    // now b is already deleted
+    assert(!p);
+    // calling p->Set(5); at this point should crash
 }
 
 void TestStaticAlloc()
@@ -68,9 +84,9 @@ void TestStaticAlloc()
         p.reset(&b);
         // a is still valid here
         assert(p);
-        (*p).set(5);
-        assert(p->get() == b.get());
-        assert((*p).get() == b.get());
+        (*p).Set(5);
+        assert(p->Get() == b.Get());
+        assert((*p).Get() == b.Get());
     }
     // now b is already deleted
     assert(!p);
@@ -82,8 +98,8 @@ void TestScope()
     {
         tracker_ptr<B> p(b);
         assert(p);
-        p->set(5);
-        assert(p->get() == b->get());
+        p->Set(5);
+        assert(p->Get() == b->Get());
         // tracking stop here
     }
     delete b;
@@ -95,17 +111,17 @@ void TestChange()
     B* b2 = new B;
     tracker_ptr<B> p(b1);
     assert(p);
-    p->set(4);
-    assert(p->get() == b1->get());
+    p->Set(4);
+    assert(p->Get() == b1->Get());
     p.reset(b2);
     assert(p);
-    p->set(5);
-    assert(p->get() != b1->get());
-    assert(p->get() == b2->get());
+    p->Set(5);
+    assert(p->Get() != b1->Get());
+    assert(p->Get() == b2->Get());
     delete b1;
     // b2 is still valid
     assert(p);
-    assert(p->get() == b2->get());
+    assert(p->Get() == b2->Get());
     delete b2;
     // now b2 also deleted
     assert(!p);
@@ -116,8 +132,8 @@ void TestWithoutConcept()
     C* c = new C;
     assert(!c->is_tracked());
     tracker_ptr<C> p(c);
-    p->set(5);
-    assert(p->get() == c->get());
+    p->Set(5);
+    assert(p->Get() == c->Get());
     assert(c->is_tracked());
     // we must rest before deletion
     p.reset(nullptr);
@@ -127,6 +143,7 @@ void TestWithoutConcept()
 int main()
 {
     TestBasic();
+    TestUnique();
     TestStaticAlloc();
     TestScope();
     TestChange();
